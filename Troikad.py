@@ -111,59 +111,59 @@ def receive():
         
         
 def send():   	
-    print(os.listdir('downloads/'))
+    print(os.listdir('downloads/'))     # print all the files inside download folder
     filepath = 'downloads/'
-    filename = input("\nInserisci il nome del file da inviare: ")
+    filename = input("\nEnter the name of the file to be sent: ")
 
-    reverseConnection = input("Se il destinatario non ha la porta TCP 2442 aperta puoi provare l'invio inverso, che può aiutare in caso di problemi di rete\nVuoi usare questa funzione?[yes][no] ")
+    reverseConnection = input("If the receiver does not have the TCP 2442 port open you can try reverse sending, which can help in case of network problems\nDo you want to use this feature?[yes][no] ")   # to use if the receiver is also using it
     if reverseConnection.lower() == "yes":
-        reverseConnect(filepath, filename)
+        reverseSend(filepath, filename)
     elif reverseConnection.lower() == "no":
-        print("ok, ho capito\n")
+        print("okay let's continue\n")
     else:
-        print("Qualsiasi cosa hai scritto lo prendo come un no\n")
+        print("whatever you wrote I take it as a No\n")
 	
-    ipSend = input("Inserisci l'indirizzo ip a cui connettersi: ")
-    server_address = (ipSend, 2442)
-    print('connessione a {} porta {}'.format(*server_address))
+    ipSend = input("Enter the ip address to connect to: ")
+    server_address = (ipSend, 2442)     # default port is 2442, you can change it easily here
+    print('Connecting to: {} port:{}'.format(*server_address))
 
-    #print(filepath+filename)
+    #print(filepath+filename)   # debug
 	
     flag = 0
-    #Crea un socket TCP/IP per peer
-    sendS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    sendS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # I create a TCP socket
 	
     sendS.setblocking(True)
-    sendS.settimeout(5)
+    sendS.settimeout(5)     # timeout for connection
     try:
     	sendS.connect(server_address)
     except:
-    	print("Host non raggiungibile oppure momentaneamente occupato\n")
+    	print("Host unreachable or busy\n")
     	main()
     sendS.settimeout(None)
 
-    print("Connessione a {}:{} riuscita".format(*server_address))
-    if os.path.exists(filepath) and os.path.isfile(filepath+filename):
-        sendS.sendall(filename.encode('utf-8'))
+    print("Connection to {}:{} successful".format(*server_address))
+    if os.path.exists(filepath) and os.path.isfile(filepath+filename):  # control if the file is existing
+        sendS.sendall(filename.encode('utf-8'))     # send the file name
         time.sleep(2)
         
-        f = open(filepath+filename, 'rb')
-        data = f.read(1024)
+        f = open(filepath+filename, 'rb')   # open file with read mode
+        data = f.read(1024)     #start sending
         while data:
             sendS.send(data)
             data = f.read(1024)
-        sendS.shutdown(socket.SHUT_WR)
-        print("File inviato!\n")
-        f.close()
+        sendS.shutdown(socket.SHUT_WR)  # closing the connection
+        print("File sent!\n")
+        f.close()   #close the file
     else:
-        print("Hai inserito un file non esistente!\n")
+        print("You ad inserted an inexistent file!\n")
         message = "errorFile"
-        connection.sendall(message.encode('utf-8'))
+        connection.sendall(message.encode('utf-8'))     # sending the error
 
     sendS.close()
 
 
-def reverseConnect(filepath, filename):
+def reverseSend(filepath, filename):
 
     try:
         sendS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
