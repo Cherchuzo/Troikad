@@ -97,6 +97,7 @@ def receive():
             f.close()
             
         connection.close()
+        ricv.close()
 
         if os.path.isfile('downloads/'+filename):   # check if the file has been downloaded well
             print("File received correctly!\nReturn to main\n")
@@ -171,112 +172,111 @@ def reverseSend(filepath, filename):
         #collego il socket alla porta
         send_address = ('0.0.0.0', 2442)
         sendS.bind(send_address)
-        print('In avvio su:{}  Porta:{}'.format(*send_address))
-    except:
-        print("Socket non avviato/inizializzato!")
+        print("Starting on:{}  Port:{}".format(*send_address))
+    except:     # if the port is already in use or an unknown error occurs
+        print("Socket not started / initialized!")
         time.sleep(2)
-        print("Errore rilevato, programma in arresto...")
+        print("Error found, application shutting down...")
         time.sleep(1)
         sys.exit()
     
-    sendS.listen(1)
+    sendS.listen(1)     # listening for one connection
     
-    print('\nIn attesa di una connessione\n')
+    print("\nWaiting for a connection\n")
 
-    sendS.setblocking(True)
-    sendS.settimeout(60)
+    sendS.setblocking(True)     # blocking the socket
+    sendS.settimeout(60)    # setting timeout
     try:
         connection, client_address = sendS.accept()
-    except:
-        print("Per sicurezza ho disattivato la modalita ricezione(Timeout scaduto)\nPer ricevere nuovamente inserisca 'ricevere'\n\n")
-        sendS.close()
-        main()
+    except:     # if the timeout occurs or there is an error
+        print("For security reasons I have disabled sender Mode(Timeout expired)\nTo send again write 'send'\n\n")
+        sendS.close()   # shutting down the socket
+        main()  # sending the user to main function
     sendS.settimeout(None)
     
             
     #ip = str(client_address[0])
-    print('connessione da {} porta:{}'.format(*client_address))
+    print("Connection from: {} port:{}".format(*client_address))
         
-    if os.path.exists(filepath) and os.path.isfile(filepath+filename):
-        connection.sendall(filename.encode('utf-8'))
-        time.sleep(2)
+    if os.path.exists(filepath) and os.path.isfile(filepath+filename):  # checking if the selected really exist
+        connection.sendall(filename.encode('utf-8'))    # sending the filename
+        time.sleep(2)   # sleep for send correctly the filename
         
-        f = open(filepath+filename, 'rb')
-        data = f.read(1024)
+        f = open(filepath+filename, 'rb')   # starts reading the file
+        data = f.read(1024)     # sending file in bytes
         while data:
             connection.send(data)
             data = f.read(1024)
-        connection.shutdown(socket.SHUT_WR)
-        print("File inviato!\n")
-        f.close()
+        connection.shutdown(socket.SHUT_WR)     # shutting down correctly the connection
+        print("File sent!\n")
+        f.close()   # closing the file
     else:
-        print("Hai inserito un file non esistente!\n")
+        print("You have inserted a wrong filename!\n")
         message = "errorFile"
-        connection.sendall(message.encode('utf-8'))
+        connection.sendall(message.encode('utf-8'))     # sending error message
         
-    sendS.close()
+    sendS.close()   # closing the socket
     main()
 
 def reverseReceive():
 
-    ipSend = input("\nInserisci l'indirizzo ip a cui connettersi: ")
-    server_address = (ipSend, 2442)
-    print('connessione a {} porta {}'.format(*server_address))
+    ipSend = input("\nEnter the ip address to connect to: ")
+    server_address = (ipSend, 2442)     # creating a tuple with the ip and port
+    print("Connection to: {} port:{}".format(*server_address))
 
-    #print(filepath+filename)
+    #print(filepath+filename)   # debug purpose
 	
     flag = 0
-    #Crea un socket TCP/IP per peer
-    ricv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ricv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    # creating TCP socket
 	
     ricv.setblocking(True)
-    ricv.settimeout(5)
+    ricv.settimeout(5)  # setting timeout
     try:
     	ricv.connect(server_address)
     except:
-    	print("Host non raggiungibile oppure momentaneamente occupato\n")
+    	print("Host unreachable or busy\n")
     	main()
-    ricv.settimeout(None)
+    ricv.settimeout(None)   # resetting the timeout
 
-    print("Connessione a {}:{} riuscita".format(*server_address))
+    print("Connection to {}:{} successful".format(*server_address))
 
-    filename = ricv.recv(1024)
+    filename = ricv.recv(1024)  # receiving the filename
     filename = filename.decode('utf-8')
-    if filename == "errorFile":
-        print("C'è stato un errore lato mittente, riavvia la ricezione\n")
+    if filename == "errorFile":     # if the filename contain "errorfile" the sender was wrong to write the correct filename
+        print("There was an error on the sender side, restart receiving\n")
         main()
     
-    print('Ricevendo:'+filename)
-    time.sleep(2)
+    print('Receiving:'+filename)
+    time.sleep(2)   # just a sleep
 
     flag = True
-    f = open("./downloads/{}".format(filename), 'wb')
-    data = ricv.recv(1024)
+    f = open("./downloads/{}".format(filename), 'wb')   # opening to write on HDD
+    data = ricv.recv(1024)  # start receiving file
     while data:
         try:
             f.write(data)
             data = ricv.recv(1024)
-        except:
-            print("\n\nErrore durante la ricezione del file")
-            f.close()
-            os.remove('downloads/'+filename)
+        except:     # if an unknown error occurs
+            print("\n\nError found while receiving the file")
+            f.close()   # closing the file
+            os.remove('downloads/'+filename)    # removing the uncompleted file
             flag = False
             time.sleep(2)
 
     if flag:        
         f.close()
             
-    ricv.close()
+    ricv.close()    # closing the connection
 
     if os.path.isfile('downloads/'+filename):
-        print("File ricevuto correttamente!\nRitorno al Main\n")
+        print("File received correctly!\nReturn to main\n")
         time.sleep(2)
-    else:
-        print("Errore sconosciuto rilevato durante scrittura su disco\nRitorno al Main\n")
+    else:   # if the file is not found
+        print("Unknown error encountered while writing to disk\nReturn to main\n")
 
     time.sleep(1)
 
-    main()
+    main()  #recalling the main()
         
 
 def main():
