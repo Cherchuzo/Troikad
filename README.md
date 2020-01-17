@@ -9,6 +9,7 @@ This python module use all built-in libraries
 Assuming that you have an internet connection:
 
 There are two connection mode included in this application:
+
    -standard is used when the receiver has opened TCP port 2442, allowing the sender to connect.
    
    -Reverse connection may be used when the receiver has not opened the TCP port or is under [NAT](https://en.wikipedia.org/wiki/Network_address_translation), but requires that the sender has the port open.
@@ -30,4 +31,4 @@ Go to [python](https://www.python.org/) official website and download the latest
 ## Limitations
 
 This module cannot work on versions of python less than 3.x.
-If you encounter problems or report bugs, at least I can try to solve them
+If you encounter problems or bugs, just report it, at least I can try to solve them
