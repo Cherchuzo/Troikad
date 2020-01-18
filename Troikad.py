@@ -314,7 +314,7 @@ print("""\
     *                   Welcome!                    *
     *     For exiting this program type 'exit'      *
     *    This app allows you to send/recv files     *
-    *    For more informations check README.txt     *
+    *     For more informations check README.md     *
     *************************************************
     """)
     
