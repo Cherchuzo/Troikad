@@ -10,9 +10,9 @@ Assuming that you have an internet connection:
 
 There are two connection mode included in this application:
 
-   -standard connection is used when the receiver has opened TCP port 2442, allowing the sender to connect.
+   -standard connection is used when the receiver has opened a TCP port, allowing the sender to connect.
    
-   -Reverse connection may be used when the receiver has not opened the TCP port or is under [NAT](https://en.wikipedia.org/wiki/Network_address_translation), but requires that the sender has the port open.
+   -Reverse connection may be used when the receiver has not opened a TCP port or is under [NAT](https://en.wikipedia.org/wiki/Network_address_translation), but requires that the sender has the port open.
     With TCP it is difficult to implement a serverless STUN mechanism
 
 
